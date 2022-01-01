@@ -171,6 +171,12 @@ class CategoryController extends Controller
      * @return bool
      */
     private function MoveNode($a, $b) {
+
+        //запрет на перемещение в себя
+        if($a === $b) {
+            return false;
+        }
+
         $nodeA = Category::where('id', $a)->first();
         $nodeB = Category::where('id', $b)->first();
 
