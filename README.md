@@ -12,7 +12,7 @@
 Все запросы к api идут через префикс `admin`
 Методы `/api/admin`:
 
-### /menu
+## /menu
 
 Параметры: 
 `id_parent` - ID родительского узла
@@ -31,7 +31,7 @@
 `/delete` **post** Удалить
 `/change-position` **post** Изменить позицию следования
 
-### \category
+## /category
 
 Параметры: 
 `id_parent` - ID родительского узла
@@ -46,7 +46,7 @@
 `/update` **post** Обновить
 `/delete` **post** Удалить
 
-### \topic
+## /topic
 
 Параметры: 
 `title` - Заголовок
@@ -62,7 +62,7 @@
 `/update` **post** Обновить
 `/delete` **post** Удалить
 
-### \section
+## /section
 
 Параметры: 
 `title` - Заголовок
@@ -73,7 +73,7 @@
 `/update` **post** Обновить
 `/delete` **post** Удалить
 
-### \file
+## /file
 
 Параметры: 
 `path` - Путь к директории
@@ -88,7 +88,7 @@
 `/dir-create` **post** создание директории
 `/dir-rename` **post** переименование директории
 
-### \banner
+## /banner
 
 Параметры: 
 `name` - Имя
@@ -101,7 +101,7 @@
 `/update` **post** Обновить
 `/delete` **post** Удалить
 
-### \position
+## /position
 
 Параметры: 
 `name` - Имя
