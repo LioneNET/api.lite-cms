@@ -32,7 +32,8 @@ class MenuController extends Controller
     //Cоздания меню
     public function apiCreateMenu(Request $resourse) {
         $data = $resourse->all();
-        $data['position_id'] = $data['position']['id'];
+        $data['position_id'] = $data['position_id'] ?? 1;
+        
         $this->addMenuItem($data);
         return $this->execute($resourse);
     }
@@ -55,14 +56,14 @@ class MenuController extends Controller
 
         //манипуляции с изменением позиции доступны только для root узлов
         if($menu['id_parent']===null) {
-            $position_id = $data['position']['id'];
+            $position_id = $data['position_id'];
         }
 
         $menu->name = $data['name'];
         $menu->url = $data['url'];
         $menu->position_id = $position_id;
         $menu->save();
-        if($data['moveNodeToID']) {
+        if(isset($data['moveNodeToID'])) {
             $this->MoveNode($data['id'], $data['moveNodeToID']);
         }
         return $this->execute($resourse);
@@ -104,6 +105,9 @@ class MenuController extends Controller
         }
 
         $rootNode = Menu::where('id', $id)->first();
+        if(!$rootNode) {
+            return response()->json(['error'=>'true', 'message'=>'No find root id', 422]);
+        }
         $lastChildNode = Menu::where('id_parent', $rootNode['id'])->where('next', null)->first();
         $newNode = new Menu();
         $newNode['name'] = $data['name'];
@@ -251,18 +255,16 @@ class MenuController extends Controller
      */
     private function ChangePosNode($a, $b) {
 
-        $next = null;
-        $sorted_items = [];
-        $menuAPrev = null;
-        $menuANext = null;
-        $menuBPrev = null;
         $menuBNext = null;
-        $menuA = null;
+        $menuA = Menu::where('id', $a)->first();
         $menuB = null;
-        $parent = Menu::where('id', $a)->first();
+
+        if(!$menuA) {
+            return false;
+        }
 
         //все ноды из одного узла
-        $nodes = Menu::where('id_parent', $parent['id_parent'])->orderBy('id', 'DESC')->get()->keyBy('id')->toArray();
+        $nodes = Menu::where('id_parent', $menuA['id_parent'])->orderBy('id', 'DESC')->get()->keyBy('id')->toArray();
 
         //если оба узла не из одного родителя, то ничего не делаем
         if(!isset($nodes[$a]) || !isset($nodes[$b])) {
@@ -274,110 +276,25 @@ class MenuController extends Controller
             return false;
         }
 
-        //запрет на изменение места с разными позициями
-        if($nodes[$a]['position_id'] !== $nodes[$b]['position_id']) {
-            return response()->json(['error'=>true, 'message'=>'Нелья перемещать в разные позиции'], 501);
-        }
-
-        //сортируем по позициям
-        $temp = [];
-        foreach($nodes as $id=>$node) {
-            if($node['position_id'] === $nodes[$a]['position_id']) {
-                $temp[$id] = $node;
-
-                //ищем начало
-                if($node['prev'] === null) {
-                    $next = $node;
-                    $sorted_items[] = $node;
-                }
-            }
-        }
-        $nodes = $temp;
-
-        //сортируем
-        foreach($nodes as $i) {
-            //сортируем
-            foreach($nodes as $j) {
-                if($next['next'] === $j['id']) {
-                    $sorted_items[] = $j;
-                    $next = $j;
-                }
-            }
-        }
-
-        //установить порядок $a и $b
-        foreach($sorted_items as $val) {
-            if($a === $val['id']) {
-                $first = $a;
-                break;
-            }
-            if($b === $val['id']) {
-                $first = $b;
-                break;
-            }
-        }
-
-        //заменить а и b если порядок нарушен
-        if($first === $b) {
-            $b = $a;
-            $a = $first;
-        }
+        $this->removeMenuFromList($a);
+        $menuA = Menu::find($a);
+        $menuB = Menu::find($b);
         
-        $menuA = Menu::where('id', $a)->first();
-        $menuB = Menu::where('id', $b)->first();
+        if($menuB->next) {
+            $menuBNext = Menu::find($menuB->next);
+        }
 
-        if($menuA['prev']) {
-            $menuAPrev = Menu::where('id', $menuA['prev'])->first();
-        }
-        if($menuA['next']) {
-            $menuANext = Menu::where('id', $menuA['next'])->first();
-        }
-        if($menuB['prev']) {
-            $menuBPrev = Menu::where('id', $menuB['prev'])->first();
-        }
-        if($menuB['next']) {
-            $menuBNext = Menu::where('id', $menuB['next'])->first();
-        }
-        
-        //поменять с ближним
-        if($menuA['next'] === $menuB['id']) {
+        $menuB->next = $menuA->id;
+        $menuA->prev = $menuB->id;
+        $menuA->next = $menuBNext->id ?? null;
 
-            $menuA['next'] = $menuBNext['id'] ?? null;
-            $menuA['prev'] = $menuB['id'];
-            $menuB['prev'] = $menuAPrev['id'] ?? null;
-            $menuB['next'] = $menuA['id'];
-            if($menuBNext) {
-                $menuBNext['prev'] = $menuA['id'];
-                $menuBNext->save();
-            }
-            if($menuAPrev) {
-                $menuAPrev['next'] = $menuB['id'];
-                $menuAPrev->save();
-            }
-            $menuA->save();
-            $menuB->save();
+        if($menuBNext) {
+            $menuBNext->prev = $menuA->id;
+            $menuBNext->save();
         }
-        //поменять с дальним
-        else if($menuA['next'] !== $menuB['id']) {
-            $menuA['next'] = $menuBNext['id'] ?? null;
-            $menuA['prev'] = $menuBPrev['id'];
-            $menuB['prev'] = $menuAPrev['id'] ?? null;
-            $menuB['next'] = $menuANext['id'];
-            $menuANext['prev'] = $menuB['id'];
-            $menuBPrev['next'] = $menuA['id'];
-            if($menuBNext) {
-                $menuBNext['prev'] = $menuA['id'];
-                $menuBNext->save();
-            }
-            if($menuAPrev) {
-                $menuAPrev['next'] = $menuB['id'];
-                $menuAPrev->save();
-            }
-            $menuANext->save();
-            $menuBPrev->save();
-            $menuA->save();
-            $menuB->save();
-        }
+
+        $menuA->save();
+        $menuB->save();
 
         return true;
     }
@@ -430,5 +347,4 @@ class MenuController extends Controller
             $nodeNext->save();
         }
     }
-    
 }
