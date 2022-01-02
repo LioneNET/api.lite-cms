@@ -10,8 +10,8 @@
 Все запросы к api идут через префикс `admin`
 Методы `/api/admin`:
 
-### menu
-Работа с меню
+### **menu**
+Меню
 | url                | method   | params                                                                              |
 | ------------------ | -------- | ----------------------------------------------------------------------------------- |
 | `/`                | **get**  | -                                                                                   |
@@ -21,6 +21,60 @@
 | `/delete`          | **post** | `id`                                                                                |
 | `/change-position` | **post** | `a`, `b`                                                                            |
 
+### **category**
+Категории
+| url       | method   | params                                      |
+| --------- | -------- | ------------------------------------------- |
+| `/`       | **get**  | -                                           |
+| `/create` | **post** | `name`, `alias`, `image`                    |
+| `/add`    | **post** | `name`, `alias`, `id_parent`, `image`       |
+| `/update` | **post** | `name`, `alias`, `id_parent`, `image`, `id` |
+| `/delete` | **post** | `id`                                        |
+
+### **topic**
+Статьи
+| url       | method   | params                                                                    |
+| --------- | -------- | ------------------------------------------------------------------------- |
+| `/`       | **get**  | -                                                                         |
+| `/create` | **post** | `title`, `short_text`, `text`, `category_id`, `image`, `section_id`       |
+| `/update` | **post** | `id`, `title`, `short_text`, `text`, `category_id`, `image`, `section_id` |
+| `/delete` | **post** | `id`                                                                      |
+
+### **section**
+Секции сайта
+| url       | method   | params                |
+| --------- | -------- | --------------------- |
+| `/`       | **get**  | -                     |
+| `/create` | **post** | `title`, `name`       |
+| `/update` | **post** | `id`, `title`, `name` |
+| `/delete` | **post** | `id`                  |
+
+### **file**
+Файлы
+| url           | method   | params                      |
+| ------------- | -------- | --------------------------- |
+| `/`           | **get**  | -                           |
+| `/upload`     | **post** | `path`, `num`, `num_chunks` |
+| `/delete`     | **post** | ~                           |
+| `/dir-create` | **post** | ~                           |
+| `/dir-rename` | **post** | ~                           |
+
+### **banner**
+Банеры
+| url       | method   | params                                       |
+| --------- | -------- | -------------------------------------------- |
+| `/`       | **get**  | -                                            |
+| `/create` | **post** | `name`, `class`, `inner_text`, `position_id` |
+| `/update` | **post** | `name`, `class`, `inner_text`, `position_id` |
+| `/delete` | **post** | `id`                                         |
+
+### **position**
+Позиции
+| url              | method   | params                |
+| ---------------- | -------- | --------------------- |
+| `/`              | **get**  | -                     |
+| `/get-pos-items` | **post** | `title`, `name`       |
+| `/change`        | **post** | `id`, `title`, `name` |
 
 ## License
 
