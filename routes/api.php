@@ -58,7 +58,7 @@ Route::group(['prefix' => 'admin'], function() {
     });
 
     Route::group(['prefix' => 'position'], function() {
-        Route::get('/get', [PositionController::class, 'getPositions']);
+        Route::get('/', [PositionController::class, 'getPositions']);
         Route::get('/get-pos-items', [PositionController::class, 'getPosItems']);
         Route::post('/change', [PositionController::class, 'positionChange']);
     });
