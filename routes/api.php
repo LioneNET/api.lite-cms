@@ -4,12 +4,17 @@ use App\Http\Controllers\BannersController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TopicsController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\SectionController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'admin'], function() {
+Route::group(['prefix'=>'auth'], function() {
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+Route::group(['prefix' => 'admin', 'middleware'=>'auth:sanctum'], function() {
 
     Route::group(['prefix' => 'menu'], function() {
         Route::get('/', [MenuController::class, 'execute']);
